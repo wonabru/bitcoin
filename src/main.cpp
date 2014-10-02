@@ -4635,7 +4635,7 @@ unsigned findmin(CBlock *pblock)
     unsigned n;
     unsigned nh = pblock->nNonce;
     unsigned nn = 0;
-    while(hash > (hash2 >> nn))
+    while(hash >= (hash2 >> nn))
     {
         if(nn++>=15)
         {
@@ -4644,7 +4644,7 @@ unsigned findmin(CBlock *pblock)
 
         n = pblock->nNonce;
     pblock->nNonce++;
-    pblock->hashPrevBlock = prevHash >> nn;
+    pblock->hashPrevBlock = hash2 >> nn;
   /*  for(int i = 0;i < 2;i++)
     {
         hashUP = pblock->GetHash();
@@ -4810,7 +4810,7 @@ ound<<30]>meanw)
                 cout << "targetHash: "<< hashTarget.ToString()<<endl;
                 cout << "BestHashAll: "<< bestHashAll.ToString()<<endl;
             }*/
-
+/*
             if(g % 1000000 > 999000)
             {
                 if(bestHash == bestHash2 || bestHash2 == 0)
@@ -4825,7 +4825,7 @@ ound<<30]>meanw)
                     bestHash2 = bestHash;
                 }
               //  cout << "nNonce: "<< nNonceFound<<endl;
-            }/*
+            }*//*
             if(g % 1500 == 0)
             {
 
@@ -4840,20 +4840,20 @@ ound<<30]>meanw)
                    break;
 
                 pblock->nNonce = nNonceFound;
-                pblock->nTime = nNonceFound;
+            //    pblock->nTime = nNonceFound;
               //  string best = hash.ToString();
 
                 hash = pblock->GetHash();
-                if(pol == 0 && hash < uint256("0x000000ffff73a39b0470921faab65dfc4228d2c7c7b1a571409faee2767f076c"))
+                if(pol == 0 && GetTime()-StartTime < 5 && hash < uint256("0x0000ffffff73a39b0470921faab65dfc4228d2c7c7b1a571409faee2767f076c"))
                 {
                     pol = GetTime()-StartTime;
                     StartTime = GetTime();
                     pol = 50.0 / pol;
                     cout << "MOC: "<< pol<<endl;
-                    if(pol < 1)
-                        break;
+                 //   if(pol < 1)
+                 //       break;
                 }
-                if(GetTime()-StartTime > 500 && pol == 0)
+               if(GetTime()-StartTime > 60 * 10 && pol == 0)
                 {
                    StartTime = GetTime();
                    break;
@@ -4861,12 +4861,12 @@ ound<<30]>meanw)
                     if(hash < bestHash)
                     {
                         bestHash = hash;
+                        cout << "Nonce: " << pblock->nNonce<<endl;
+                        cout << "BestHashll: "<<hash.ToString()<<endl;
                     }
                     if(hash < bestHashAll)
                     {
                         bestHashAll = hash;
-                        cout << "Nonce: " << pblock->nNonce<<endl;
-                        cout << "BestHashll: "<<bestHashAll.ToString()<<endl;
                     }
                     if (hash <= hashTarget)
                     {
@@ -4880,20 +4880,20 @@ ound<<30]>meanw)
                     StartTime = GetTime();
                     break;
                     }
-            boost::this_thread::interruption_point();
-            if (vNodes.empty())
+          //  boost::this_thread::interruption_point();
+           /* if (vNodes.empty())
             {
                 StartTime = GetTime();
 
                 break;
-            }
+            }*/
          //   if (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60)
          //       break;
-            if (pindexPrev != pindexBest)
+          /*  if (pindexPrev != pindexBest)
             {
                 StartTime = GetTime();
                 break;
-            }
+            }*////
 
         }
         }
