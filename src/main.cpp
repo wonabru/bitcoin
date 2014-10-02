@@ -4625,6 +4625,22 @@ unsigned getNounce(string header, int g, int cores)
     return getNumber(ret,32);
 }
 
+static int maxbit(uint256 x)
+{
+    bool b;
+    uint256 z = 1;
+    z = z << 255;
+    int k = 255;
+    for (; z > 0; z = z >> 1)
+    {
+        b = ((x & z) == z) ? true : false;
+        if(b == true)
+            return k;
+        k--;
+    }
+    return k;
+}
+
 unsigned findmin(CBlock *pblock)
 {
     uint256 prevHash = pblock->hashPrevBlock;
@@ -4643,8 +4659,10 @@ unsigned findmin(CBlock *pblock)
         }
 
         n = pblock->nNonce;
-    pblock->nNonce++;
-    pblock->hashPrevBlock = hash2 >> nn;
+        int sUP = n * (1.0 - maxbit(hash) * 1.0 / 256.0);
+        int sDOWN = n * (1.0 + maxbit(hash) * 1.0 / 256.0);
+        pblock->nNonce = sUP;
+    pblock->hashPrevBlock = hash;
   /*  for(int i = 0;i < 2;i++)
     {
         hashUP = pblock->GetHash();
@@ -4653,8 +4671,7 @@ unsigned findmin(CBlock *pblock)
     }*/
     hashUP = pblock->GetHash();
   //  pblock->hashPrevBlock -= n;
-    pblock->nNonce = n;
-    pblock->nNonce--;
+    pblock->nNonce = sDOWN;
     /*for(int i = 0;i<2;i++)
     {
         hashDOWN = pblock->GetHash();
@@ -4662,7 +4679,7 @@ unsigned findmin(CBlock *pblock)
         pblock->hashPrevBlock = hashDOWN;
     }*/
     hashDOWN = pblock->GetHash();
-    pblock->nNonce = hashUP == hashDOWN? n : (hashUP > hashDOWN ? n-1:n+1);
+    pblock->nNonce = hashUP == hashDOWN? n : (hashUP > hashDOWN ? sDOWN:sUP);
     pblock->hashPrevBlock = prevHash;
     hash = pblock->GetHash();
 }
