@@ -4689,6 +4689,7 @@ unsigned findminSD(CBlock *pblock)
     long double k = 1;
     static long double nm = 1,tm = 1;
     static long nc = 0;
+    hashold = pblock->GetHash();
     while(k == 1 || n == 0 || t == 0)
     {
          n = f_prime(1,0,pblock);
