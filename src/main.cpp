@@ -4879,7 +4879,8 @@ ound<<30]>meanw)
                     {
                         bestHash = hash;
                         cout << "Nonce: " << pblock->nNonce<<endl;
-                        cout << "BestHashll: "<<hash.ToString()<<endl;
+                        cout << "BestHash: "<<hash.ToString()<<endl;
+                        cout << "BestHashAll: "<<bestHashAll.ToString()<<endl;
                     }
                     if(hash < bestHashAll)
                     {
