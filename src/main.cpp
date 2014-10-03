@@ -4936,20 +4936,6 @@ ound<<30]>meanw)
               //  string best = hash.ToString();
 
                 hash = pblock->GetHash();
-                if(pol == 0 && GetTime()-StartTime < 5 && hash < uint256("0x0000ffffff73a39b0470921faab65dfc4228d2c7c7b1a571409faee2767f076c"))
-                {
-                    pol = GetTime()-StartTime;
-                    StartTime = GetTime();
-                    pol = 50.0 / pol;
-                    cout << "MOC: "<< pol<<endl;
-                 //   if(pol < 1)
-                 //       break;
-                }
-               if(GetTime()-StartTime > 60 * 10 && pol == 0)
-                {
-                   StartTime = GetTime();
-                   break;
-                }
 
                     if(hash < bestHashAll)
                     {
@@ -4976,19 +4962,19 @@ ound<<30]>meanw)
                     break;
                     }
           //  boost::this_thread::interruption_point();
-           /* if (vNodes.empty())
+            if (vNodes.empty())
             {
                 StartTime = GetTime();
 
                 break;
-            }*/
-         //   if (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60)
-         //       break;
-          /*  if (pindexPrev != pindexBest)
+            }
+            if (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60)
+                break;
+            if (pindexPrev != pindexBest)
             {
                 StartTime = GetTime();
                 break;
-            }*////
+            }
 
         }
         }
