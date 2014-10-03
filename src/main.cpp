@@ -4832,110 +4832,27 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         int64 nStart = GetTime();
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
         uint256 hash;
-        pol = 0;
-        //pblock2.nNonce = 0;
-        /*
-        pblock->nVersion = 0;
-        pblock->nBits = 0;
-        pblock->hashMerkleRoot = 0;
-        pblock->hashPrevBlock = 0;
-        pblock->nTime = 0;*/
-      //  string header = pblock->createHeader();
-       // uint256 bestHash2("0xff0000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-       /* ofstream fileout("header.ddd");
-        fileout << header;
-        fileout.close();
-        ::system("7z a -mx=9 header.ddd.7z header.ddd > /dev/null");
-        ifstream filein("header.ddd.7z");
-        string str;
-        filein >> str;
-        filein.close();
-        uint256 struint;
-        memcpy(&struint,&(str.c_str()[0]),32);
-        string h7z = string(byte_to_binary(struint));
-  */ //     for(int i = 0;i<cores;i++)
-        static unsigned int nNonceFound = 0;
-        static unsigned int nTimeFound = 0;
-    pblock->nNonce = rand();
+        unsigned int nNonceFound = 0;
+        unsigned int nTimeFound = 0;
+    pblock->nNonce = rand() % 0xff000000;
     nTimeFound = pblock->nTime;
     hash = pblock->GetHash();
     bestHash = hash;
-    int c = 0;
     try
         {
         loop
         {
-
-            g++;
-        //    if(hash >= hash<<2)
-        //        c = rand() % (256 - 32 - 16);
-         //   uint256 d = hash;
-         //   d = d >> 256-32;
-
-        //    memcpy(&nNonceFound,&d,4);
-
-         //   meanc++;
-         //   nNonceFound = WON(nNonceFound,~nNonceFound);
-          //  nNonceFound = WON(nNonceFound,((nNonceFound>>1)|(nNonceFound))+(~((nNonceFound)&(0x00000001)))*0x70000000);
-            /*map<unsigned, unsigned>::const_iterator mi = wrongNonce.find(nNonceFound<<30);
-            if (mi != wrongNonce.end())
-            {
-              wrongNonce[nNonceFound<<30]++;
-            }
-            else
-            {
-              wrongNonce[nNonceFound<<30] = 1;
-            }
-
-            meanw = meanw * (meanc)/(meanc+1)+1.0/(meanc+1)*(wrongNonce[nNonceFound<<30]);
-
-            if(wrongNonce[nNonceF
-ound<<30]>meanw)
-                nNonceFound = rand();
-*/
-          /*  if(g % 10000000 == 0)
-            {
-                cout << "Nonce: " << nNonceFound<<endl;
-                cout << "BestHash: "<< bestHash.ToString()<<endl;
-                cout << "targetHash: "<< hashTarget.ToString()<<endl;
-                cout << "BestHashAll: "<< bestHashAll.ToString()<<endl;
-            }*/
-/*
-            if(g % 1000000 > 999000)
-            {
-                if(bestHash == bestHash2 || bestHash2 == 0)
-                {
-                    bestHash2 = bestHash;
-                    bestHash = hash;
-                    StartTime = GetTime();
-                    break;
-                }else
-                if(bestHash != bestHash2)
-                {
-                    bestHash2 = bestHash;
-                }
-              //  cout << "nNonce: "<< nNonceFound<<endl;
-            }*//*
-            if(g % 1500 == 0)
-            {
-
-                    hashold = bestHash;
-            }*/
-          //  nNonceFound = rand();
+               g++;
                 pblock->nTime = nTimeFound;
-                static unsigned nh;
+                unsigned nh;
                     nh = findminSD(pblock);
                     nTimeFound = pblock->nTime;
                 if(nNonceFound == nh)
                     break;
                 nNonceFound = nh;
-                if(nNonceFound == 0 || nNonceFound ==  0xffffffff)
+                if(nNonceFound >  0xff000000)
                    break;
-
                 pblock->nNonce = nNonceFound;
-            //    pblock->nTime = nNonceFound;
-              //  string best = hash.ToString();
-
                 hash = pblock->GetHash();
 
                     if(hash < bestHashAll)
@@ -4962,7 +4879,7 @@ ound<<30]>meanw)
                     StartTime = GetTime();
                     break;
                     }
-          //  boost::this_thread::interruption_point();
+            boost::this_thread::interruption_point();
             if (vNodes.empty())
             {
                 StartTime = GetTime();
