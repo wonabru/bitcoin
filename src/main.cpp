@@ -4687,11 +4687,15 @@ unsigned findminSD(CBlock *pblock)
     long double n = pblock->nNonce;
     long double t = pblock->nTime;
     long double k = 1;
-
+    static long double nm,tm;
+    static long nc = 0;
     while(k == 1 || n == 0 || t == 0)
     {
          n = f_prime(1,0,pblock);
          t = f_prime(0,1,pblock);
+         nm = nm * nc / (nc+1.0)+n * nc /(nc+1.0);
+         tm = tm * nc / (nc+1.0)+t * nc /(nc+1.0);
+         nc++;
          if(n == 0 || t == 0)
          {
              break;
@@ -4699,11 +4703,11 @@ unsigned findminSD(CBlock *pblock)
          k = n/t;
          if(k > 1)
          {
-            y_old += t/fabs(t);
-            x_old += (int)(n/fabs(n) * fabs(k));
+            y_old += t/tm/fabs(t);
+            x_old += (int)round(n/nm/fabs(n) * fabs(k));
          }else{
-             x_old += n/fabs(n);
-             y_old += (int)(t/fabs(t) * fabs(1.0/k));
+             x_old += n/nm/fabs(n);
+             y_old += (int)round(t/tm/fabs(t) * fabs(1.0/k));
          }
          break;
     }
