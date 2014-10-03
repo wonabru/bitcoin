@@ -4693,8 +4693,8 @@ unsigned findminSD(CBlock *pblock)
     {
          n = f_prime(1,0,pblock);
          t = f_prime(0,1,pblock);
-         nm = nm * nc / (nc+1.0)+n * nc /(nc+1.0);
-         tm = tm * nc / (nc+1.0)+t * nc /(nc+1.0);
+         nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
+         tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
          if(n == 0 || t == 0)
          {
