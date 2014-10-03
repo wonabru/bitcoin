@@ -4855,6 +4855,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         string h7z = string(byte_to_binary(struint));
   */ //     for(int i = 0;i<cores;i++)
         static unsigned int nNonceFound = 0;
+        static unsigned int nTimeFound = 0;
     pblock->nNonce = rand();
     hash = pblock->GetHash();
     bestHash = hash;
@@ -4920,8 +4921,10 @@ ound<<30]>meanw)
                     hashold = bestHash;
             }*/
           //  nNonceFound = rand();
+                pblock->nTime = nTimeFound;
                 static unsigned nh;
                     nh = findminSD(pblock);
+                    nTimeFound = pblock->nTime;
                 if(nNonceFound == nh)
                     break;
                 nNonceFound = nh;
