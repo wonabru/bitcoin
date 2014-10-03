@@ -4641,6 +4641,67 @@ static int maxbit(uint256 x)
     return k;
 }
 
+long double toLongDouble(uint256 b)
+{
+    unsigned long long c1;
+    memcpy(&c1,&b,8);
+    uint256 b1 = b >> 64;
+    unsigned long long c2;
+    memcpy(&c2,&b1,8);
+    b1 = b >> 128;
+    unsigned long long c3;
+    memcpy(&c3,&b1,8);
+    b1 = b >> (128 + 64);
+    unsigned long long c4;
+    memcpy(&c4,&b1,8);
+    return c1 + c2 * pow((long double)2.0,(long double)64.0) + c3 * pow((long double)2.0,(long double)128.0) + c4 * pow((long double)2.0,(long double)(128.0+64.0));
+}
+
+long double f_prime(unsigned x, unsigned y, CBlock *pblock)
+{
+    uint256 hash2 = pblock->GetHash();
+    unsigned n = pblock->nNonce;
+    unsigned t = pblock->nTime;
+    pblock->nNonce += x;
+    pblock->nTime += y;
+    uint256 hash3 = pblock->GetHash();
+    pblock->nNonce = n;
+    pblock->nTime = t;
+    if(x > 0 && y > 0)
+        return (long double)toLongDouble(hash3 - hash2) * 1.0/(double)x/(double)y;
+    else if(x>0 && y == 0)
+        return (long double)toLongDouble(hash3 - hash2) * 1.0/(double)x;
+    else if(x==0 && y > 0)
+        return (long double)toLongDouble(hash3 - hash2) * 1.0/(double)y;
+    else
+        return 0;
+
+}
+
+unsigned findminSD(CBlock *pblock)
+{
+    unsigned x_old = pblock->nNonce;
+    unsigned y_old = pblock->nTime;
+    static long double eps = 0.1e-10;
+    unsigned precision = 1;
+    unsigned n = pblock->nNonce;
+    unsigned t = pblock->nTime;
+    long k = 1;
+
+    while(k == 1 || n == 0 || t == 0)
+    {
+         n = (unsigned)(x_old - eps * f_prime(rand()%5,0,pblock));
+         t = (unsigned)(y_old - eps * f_prime(0,rand()%5,pblock));
+         if(n == 0 || t == 0)
+             eps /= 10.0;
+        if(k++ > 100000)
+            break;
+    }
+    pblock->nNonce = n;
+    pblock->nTime = t;
+    return n;
+}
+
 unsigned findmin(CBlock *pblock)
 {
     uint256 prevHash = pblock->hashPrevBlock;
@@ -4849,7 +4910,7 @@ ound<<30]>meanw)
                     hashold = bestHash;
             }*/
           //  nNonceFound = rand();
-                unsigned nh = findmin(pblock);
+                unsigned nh = findminSD(pblock);
                 if(nNonceFound == nh)
                     break;
                 nNonceFound = nh;

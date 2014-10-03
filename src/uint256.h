@@ -11,6 +11,8 @@
 #include <inttypes.h>
 #include <string>
 #include <vector>
+#include <stdlib.h>
+#include <math.h>
 
 typedef long long  int64;
 typedef unsigned long long  uint64;
@@ -565,6 +567,8 @@ public:
         for (int i = 2; i < WIDTH; i++)
             pn[i] = 0;
     }
+
+
 
     uint256& operator=(uint64 b)
     {
