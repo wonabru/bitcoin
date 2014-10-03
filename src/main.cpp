@@ -4683,7 +4683,7 @@ unsigned findminSD(CBlock *pblock)
     unsigned x_old = pblock->nNonce;
     unsigned y_old = pblock->nTime;
     static long double eps = 0.1e-10;
-    unsigned precision = 1;
+    uint256 hash,hashold;
     long double n = pblock->nNonce;
     long double t = pblock->nTime;
     long double k = 1;
@@ -4693,8 +4693,8 @@ unsigned findminSD(CBlock *pblock)
     {
          n = f_prime(1,0,pblock);
          t = f_prime(0,1,pblock);
-         nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
-         tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
+      //   nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
+      //   tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
          if(n == 0 || t == 0)
          {
@@ -4703,16 +4703,20 @@ unsigned findminSD(CBlock *pblock)
          k = n/t;
          if(k > 1)
          {
-            y_old += t/tm;
-            x_old += (int)round(n/tm * fabs(k));
+             y_old += t/fabs(t);
+             x_old += (int)round(n/fabs(n) * fabs(k));
          }else{
-             x_old += n/nm;
-             y_old += (int)round(t/nm * fabs(1.0/k));
+             x_old += n/fabs(n);
+             y_old += (int)round(t/fabs(t) * fabs(1.0/k));
          }
-         break;
+
+        pblock->nNonce = x_old;
+        pblock->nTime = y_old;
+        hash = pblock->GetHash();
+        if(hash > hashold)
+            break;
+        hashold = hash;
     }
-    pblock->nNonce = x_old;
-    pblock->nTime = y_old;
     return x_old;
 }
 
