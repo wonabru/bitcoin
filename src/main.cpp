@@ -4854,7 +4854,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         memcpy(&struint,&(str.c_str()[0]),32);
         string h7z = string(byte_to_binary(struint));
   */ //     for(int i = 0;i<cores;i++)
-        unsigned int nNonceFound = 0;
+        static unsigned int nNonceFound = 0;
     pblock->nNonce = rand();
     hash = pblock->GetHash();
     bestHash = hash;
@@ -4920,7 +4920,8 @@ ound<<30]>meanw)
                     hashold = bestHash;
             }*/
           //  nNonceFound = rand();
-                unsigned nh = findminSD(pblock);
+                static unsigned nh;
+                    nh = findminSD(pblock);
                 if(nNonceFound == nh)
                     break;
                 nNonceFound = nh;
@@ -4946,16 +4947,18 @@ ound<<30]>meanw)
                    StartTime = GetTime();
                    break;
                 }
+
+                    if(hash < bestHashAll)
+                    {
+                        bestHashAll = hash;
+                    }
                     if(hash < bestHash)
                     {
                         bestHash = hash;
                         cout << "Nonce: " << pblock->nNonce<<endl;
+                        cout << "Time: " << pblock->nTime<<endl;
                         cout << "BestHash: "<<hash.ToString()<<endl;
                         cout << "BestHashAll: "<<bestHashAll.ToString()<<endl;
-                    }
-                    if(hash < bestHashAll)
-                    {
-                        bestHashAll = hash;
                     }
                     if (hash <= hashTarget)
                     {
