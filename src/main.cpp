@@ -4857,6 +4857,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         static unsigned int nNonceFound = 0;
         static unsigned int nTimeFound = 0;
     pblock->nNonce = rand();
+    nTimeFound = pblock->nTime;
     hash = pblock->GetHash();
     bestHash = hash;
     int c = 0;
