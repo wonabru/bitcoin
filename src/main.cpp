@@ -4734,11 +4734,6 @@ unsigned findminSD(CBlock *pblock)
         {
             if(howManyOnes(~(x_old&y_old))<10 || howManyOnes((x_old&y_old))<10 || howManyOnes(~(x_old|y_old))<10 || howManyOnes((x_old|y_old))<10||howManyOnes(~(x_old^y_old))<16 || howManyOnes((x_old^y_old))<16)
                 break;
-            else
-            {
-                pblock->nTime = GetTime();
-                break;
-            }
         }
     }
     return x_old;
