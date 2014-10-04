@@ -4807,8 +4807,6 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
     unsigned int nExtraNonce = 0;
     long g=0;
     uint256 bestHash("0xff0000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-    uint256 bestHash2 = 0;
-   double pol = 0;
    int64 StartTime = GetTime();
     static uint256 bestHashAll = bestHash;
    try {
@@ -4836,9 +4834,6 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
        char pdatabuf[128+16]; char* pdata = alignup<16>(pdatabuf);
        char phash1buf[64+16]; char* phash1 = alignup<16>(phash1buf);
        FormatHashBuffers(pblock, pmidstate, pdata, phash1);
-       unsigned int& nBlockTime = *(unsigned int*)(pdata + 64 + 4);
-       unsigned int& nBlockBits = *(unsigned int*)(pdata + 64 + 8);
-       unsigned int& nBlockNonce = *(unsigned int*)(pdata + 64 + 12);
        //
        // Search
        //
@@ -4847,13 +4842,15 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         int64 nStart = GetTime();
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
         unsigned int nNonceFound = 0;
+        unsigned int nNonceFound2 = 0;
         unsigned int nTimeFound = 0;
         unsigned int nHashesDone = 0;
         // Crypto++ SHA256
-        nNonceFound = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
+        nNonceFound2 = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
         // Check if something found
-        if (nNonceFound != (unsigned int) -1)
+        if (nNonceFound2 != (unsigned int) -1)
         {
+        nNonceFound = ByteReverse(nNonceFound2);
         nTimeFound = pblock->nTime;
         hash = pblock->GetHash();
          bestHash = hash;
@@ -4869,7 +4866,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                 if(nNonceFound == nh)
                     break;
                 nNonceFound = nh;
-                if(nNonceFound >  0xff000000)
+                if(nNonceFound >=  0xff000000)
                    break;
                 pblock->nNonce = nNonceFound;
                 hash = pblock->GetHash();
@@ -4905,8 +4902,8 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
 
                 break;
             }
-            if (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60)
-                break;
+          //  if (nTransactionsUpdated != nTransactionsUpdatedLast)
+          //      break;
             if (pindexPrev != pindexBest)
             {
                 StartTime = GetTime();
