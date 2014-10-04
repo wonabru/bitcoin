@@ -4874,14 +4874,16 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                     if(hash < bestHashAll)
                     {
                         bestHashAll = hash;
+                        cout << "Nonce: " << pblock->nNonce<<endl;
+                        cout << "Time: " << pblock->nTime<<endl;
+                        cout << "BestHash: "<<(256 - maxbit(bestHash)) <<endl;
+                        cout << "BestHashAll: "<<(256 - maxbit(bestHashAll))<<endl;
+                        cout << "HashTarget: "<<(256 - maxbit(hashTarget))<<endl;
                     }
                     if(hash < bestHash)
                     {
                         bestHash = hash;
-                        cout << "Nonce: " << pblock->nNonce<<endl;
-                        cout << "Time: " << pblock->nTime<<endl;
-                        cout << "BestHash: "<<maxbit(bestHash) <<endl;
-                        cout << "BestHashAll: "<<maxbit(bestHashAll)<<endl;
+
                     }
                     if (hash <= hashTarget)
                     {
