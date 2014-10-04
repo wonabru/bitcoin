@@ -4736,9 +4736,9 @@ unsigned findminSD(CBlock *pblock)
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
 
-        if((k < 1.25 && k > 0.75))
+        if((k < 1.05 && k > 0.95))
         {
-            if(howManyOnes(~(x_old&y_old))<=1 || howManyOnes((x_old&y_old))<=1 || howManyOnes(~(x_old|y_old))<=1 || howManyOnes((x_old|y_old))<=1||howManyOnes(~(x_old^y_old))<=6 || howManyOnes((x_old^y_old))<=6)
+            if(howManyOnes(~(x_old^y_old))<=16 || howManyOnes((x_old^y_old))<=16)
                 break;
         }
     }
