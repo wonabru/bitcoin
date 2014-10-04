@@ -4641,6 +4641,18 @@ static int maxbit(uint256 x)
     return k;
 }
 
+int howManyOnes(unsigned q)
+{
+    const char * qs = byte_to_binary(q);
+    int ret = 0;
+    for(int i=0;i<32;i++)
+    {
+        if(qs[i] == '1')
+            ret++;
+    }
+    return ret;
+}
+
 long double toLongDouble(uint256 b)
 {
     static long double pow64 = pow((long double)2.0,(long double)64.0),pow128 = pow((long double)2.0,(long double)128.0),pow192 = pow((long double)2.0,(long double)192.0);
@@ -4715,14 +4727,17 @@ unsigned findminSD(CBlock *pblock)
              x_old += (int)round(n/fabs(n) * fabs(k));
          }else{
              x_old += n/fabs(n);
-             y_old += t/fabs(t);//(int)round(t/fabs(t) * fabs(1.0/k));
+             y_old += (int)round(t/fabs(t) * fabs(1.0/k));
          }
 
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
         if((k < 1.01 && k > 0.99))
         {
-            break;
+            if(howManyOnes(x_old^y_old)>16)
+                break;
+            else
+                pblock->nTime = GetTime();
         }
       //  hash = pblock->GetHash();
      //   if(hash >= hashold)
@@ -4777,6 +4792,9 @@ unsigned findmin(CBlock *pblock)
     pblock->hashPrevBlock = prevHash;
     return pblock->nNonce;
 }
+
+
+
 
 unsigned WON(unsigned q, unsigned w)
 {
