@@ -4895,6 +4895,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                     cout << "Block found. Time [minutes]: "<< (GetTime() - nStart)/1000.0/60.0<<endl;
                     //delete pblocktemplate;
                     StartTime = GetTime();
+                    bestHashAll = (uint256)(-1);
                     break;
                     }
             boost::this_thread::interruption_point();
