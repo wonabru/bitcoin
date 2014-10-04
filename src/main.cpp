@@ -4643,7 +4643,7 @@ static int maxbit(uint256 x)
 
 int howManyOnes(unsigned q)
 {
-    char qs[33];
+    char *qs;
     qs = byte_to_binary(q);
     int ret = 0;
     for(int i=0;i<32;i++)
