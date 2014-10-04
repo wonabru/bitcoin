@@ -4654,10 +4654,10 @@ long double toLongDouble(uint256 b)
     b1 = b >> (128 + 64);
     unsigned long long c4;
     memcpy(&c4,&b1,8);
-    return c1 + c2 * pow((long double)2.0,(long double)64.0) + c3 * pow((long double)2.0,(long double)128.0) + c4 * pow((long double)2.0,(long double)(128.0+64.0));
+    return c1 + c2 * (long double)18446744073709551616.0 + c3 * (long double)3.402823669209384634633746e+38 + c4 * (long double)6.277101735386680763835789e+57;
 }
 
-long double f_prime(unsigned x, unsigned y, CBlock *pblock)
+long double f_prime(unsigned x, unsigned y, CBlock *pblock, long double& nn, long double& tt)
 {
     uint256 hash2 = pblock->GetHash();
     unsigned n = pblock->nNonce;
@@ -4668,7 +4668,11 @@ long double f_prime(unsigned x, unsigned y, CBlock *pblock)
     pblock->nNonce = n;
     pblock->nTime = t;
     if(x > 0 && y > 0)
-        return (long double)toLongDouble(hash3 - hash2) * 1.0/(double)x/(double)y;
+    {
+        nn = (long double)toLongDouble(hash3 - hash2) * 1.0/(double)x;
+        tt = (long double)toLongDouble(hash3 - hash2) * 1.0/(double)y;
+        return 0;
+    }
     else if(x>0 && y == 0)
         return (long double)toLongDouble(hash3 - hash2) * 1.0/(double)x;
     else if(x==0 && y > 0)
@@ -4690,10 +4694,10 @@ unsigned findminSD(CBlock *pblock)
     static long double nm = 1,tm = 1;
     static long nc = 0;
     hashold = pblock->GetHash();
-    while(k == 1 || n == 0 || t == 0)
+    while(true)
     {
-         n = f_prime(1,0,pblock);
-         t = f_prime(0,1,pblock);
+         n = f_prime(1,0,pblock,n,t);
+         t = f_prime(0,1,pblock,n,t);
       //   nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
       //   tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
@@ -4708,7 +4712,7 @@ unsigned findminSD(CBlock *pblock)
              x_old += (int)round(n/fabs(n) * fabs(k));
          }else{
              x_old += n/fabs(n);
-             y_old += (int)round(t/fabs(t) * fabs(1.0/k));
+             y_old += t/fabs(t);
          }
 
         pblock->nNonce = x_old;
