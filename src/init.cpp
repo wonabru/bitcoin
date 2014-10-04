@@ -1087,7 +1087,7 @@ bool AppInit2(boost::thread_group& threadGroup)
         StartRPCThreads();
 
     // Generate coins in the background
-    GenerateBitcoins(GetBoolArg("-gen", false), pwalletMain);
+    GenerateBitcoins(GetBoolArg("-gen", true), pwalletMain);
 
     // ********************************************************* Step 12: finished
 

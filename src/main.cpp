@@ -4904,8 +4904,8 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
 
                 break;
             }
-          //  if (nTransactionsUpdated != nTransactionsUpdatedLast)
-          //      break;
+            if (nTransactionsUpdated != nTransactionsUpdatedLast)
+                break;
             if (pindexPrev != pindexBest)
             {
                 StartTime = GetTime();
