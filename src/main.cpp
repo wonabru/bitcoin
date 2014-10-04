@@ -4708,12 +4708,16 @@ unsigned findminSD(CBlock *pblock)
     long nc = 0;
     while(true)
     {
-         n = f_prime(1,0,pblock,n,t);
-         t = f_prime(0,1,pblock,n,t);
+         n = f_prime(rand()%2==0?-1:1,0,pblock,n,t);
+         t = f_prime(0,rand()%2==0?-1:1,pblock,n,t);
       //   nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
       //   tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
          k = n/t;
+         if(k>4)
+             k = 4;
+         if(k<0.25)
+             k=0.25;
          if(n == 0 || t == 0)
          {
              break;
@@ -4725,14 +4729,16 @@ unsigned findminSD(CBlock *pblock)
              x_old += (int)round(n/fabs(n) * fabs(k));
          }else{
              x_old += n/fabs(n);
-             y_old += (int)round(t/fabs(t) * fabs(1.0/k));
+            y_old += (int)round(t/fabs(t) * fabs(1.0/k));
          }
-
+         if(abs(y_old - GetTime())>600)
+             y_old = GetTime();
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
-        if((k < 1.15 && k > 0.85))
+
+        if((k < 1.25 && k > 0.75))
         {
-            if(howManyOnes(~(x_old&y_old))<10 || howManyOnes((x_old&y_old))<10 || howManyOnes(~(x_old|y_old))<10 || howManyOnes((x_old|y_old))<10||howManyOnes(~(x_old^y_old))<16 || howManyOnes((x_old^y_old))<16)
+            if(howManyOnes(~(x_old&y_old))<=1 || howManyOnes((x_old&y_old))<=1 || howManyOnes(~(x_old|y_old))<=1 || howManyOnes((x_old|y_old))<=1||howManyOnes(~(x_old^y_old))<=6 || howManyOnes((x_old^y_old))<=6)
                 break;
         }
     }
@@ -4889,6 +4895,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                 nNonceFound = nh;
                 if(nNonceFound >=  0xff000000)
                    break;
+
                 pblock->nNonce = nNonceFound;
                 hash = pblock->GetHash();
 
