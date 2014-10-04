@@ -4730,12 +4730,15 @@ unsigned findminSD(CBlock *pblock)
 
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
-        if((k < 1.01 && k > 0.99))
+        if((k < 1.15 && k > 0.85))
         {
-            if(howManyOnes(x_old^y_old)>16)
+            if(howManyOnes(~(x_old&y_old))<10 || howManyOnes((x_old&y_old))<10 || howManyOnes(~(x_old|y_old))<10 || howManyOnes((x_old|y_old))<10||howManyOnes(~(x_old^y_old))<16 || howManyOnes((x_old^y_old))<16)
                 break;
             else
+            {
                 pblock->nTime = GetTime();
+                break;
+            }
         }
     }
     return x_old;
@@ -4853,10 +4856,10 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         printf("Running BitcoinMiner with %"PRIszu" transactions in block (%u bytes)\n", pblock->vtx.size(),
                ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
-      /*  char pmidstatebuf[32+16]; char* pmidstate = alignup<16>(pmidstatebuf);
+        char pmidstatebuf[32+16]; char* pmidstate = alignup<16>(pmidstatebuf);
        char pdatabuf[128+16]; char* pdata = alignup<16>(pdatabuf);
        char phash1buf[64+16]; char* phash1 = alignup<16>(phash1buf);
-       FormatHashBuffers(pblock, pmidstate, pdata, phash1);*/
+       FormatHashBuffers(pblock, pmidstate, pdata, phash1);
        //
        // Search
        //
@@ -4868,8 +4871,8 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         unsigned int nNonceFound2 = 0;
         unsigned int nTimeFound = 0;
         unsigned int nHashesDone = 0;
-        // Crypto++ SHA256
-        nNonceFound2 = rand() % 0xff000000;//ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
+        // Crypto++ SHA256 rand() % 0xff000000;//
+        nNonceFound2 = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
         // Check if something found
         if (nNonceFound2 != (unsigned int) -1)
         {
