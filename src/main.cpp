@@ -4799,7 +4799,7 @@ void controlfork(CWallet *pwallet, int cores)
 void static BitcoinMiner(CWallet *pwallet, int cores)
 {
     printf("BitcoinMiner started\n");
-    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    SetThreadPriority(THREAD_PRIORITY_BELOW_NORMAL);
     RenameThread("bitcoin-miner");
 
     // Each thread has its own key and counter
@@ -4891,7 +4891,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
 
                     SetThreadPriority(THREAD_PRIORITY_NORMAL);
                     CheckWork(pblock, *pwalletMain, reservekey);
-                    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+                    SetThreadPriority(THREAD_PRIORITY_BELOW_NORMAL);
                     cout << "Block found. Time [minutes]: "<< (GetTime() - nStart)/1000.0/60.0<<endl;
                     //delete pblocktemplate;
                     StartTime = GetTime();
