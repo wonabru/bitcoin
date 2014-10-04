@@ -4832,21 +4832,31 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         printf("Running BitcoinMiner with %"PRIszu" transactions in block (%u bytes)\n", pblock->vtx.size(),
                ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
-        //
-        // Pre-build hash buffers
-
-        //
-        // Search
-        //
+        char pmidstatebuf[32+16]; char* pmidstate = alignup<16>(pmidstatebuf);
+       char pdatabuf[128+16]; char* pdata = alignup<16>(pdatabuf);
+       char phash1buf[64+16]; char* phash1 = alignup<16>(phash1buf);
+       FormatHashBuffers(pblock, pmidstate, pdata, phash1);
+       unsigned int& nBlockTime = *(unsigned int*)(pdata + 64 + 4);
+       unsigned int& nBlockBits = *(unsigned int*)(pdata + 64 + 8);
+       unsigned int& nBlockNonce = *(unsigned int*)(pdata + 64 + 12);
+       //
+       // Search
+       //
+       uint256 hashbuf[2];
+       uint256& hash = *alignup<16>(hashbuf);
         int64 nStart = GetTime();
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
-        uint256 hash;
         unsigned int nNonceFound = 0;
         unsigned int nTimeFound = 0;
-    pblock->nNonce = rand() % 0xff000000;
-    nTimeFound = pblock->nTime;
-    hash = pblock->GetHash();
-    bestHash = hash;
+        unsigned int nHashesDone = 0;
+        // Crypto++ SHA256
+        nNonceFound = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
+        // Check if something found
+        if (nNonceFound != (unsigned int) -1)
+        {
+        nTimeFound = pblock->nTime;
+        hash = pblock->GetHash();
+         bestHash = hash;
     try
         {
         loop
@@ -4902,13 +4912,14 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                 StartTime = GetTime();
                 break;
             }
+        }
+        }
+         catch(...)
+         {
 
+         }
         }
-        }
-        catch(...)
-        {
 
-        }
         }
     }
     catch (boost::thread_interrupted)
