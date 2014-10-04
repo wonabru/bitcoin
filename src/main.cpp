@@ -4643,6 +4643,7 @@ static int maxbit(uint256 x)
 
 long double toLongDouble(uint256 b)
 {
+    static long double pow64 = pow((long double)2.0,(long double)64.0),pow128 = pow((long double)2.0,(long double)128.0),pow192 = pow((long double)2.0,(long double)192.0);
     unsigned long long c1;
     memcpy(&c1,&b,8);
     uint256 b1 = b >> 64;
@@ -4654,7 +4655,8 @@ long double toLongDouble(uint256 b)
     b1 = b >> (128 + 64);
     unsigned long long c4;
     memcpy(&c4,&b1,8);
-    return c1 + c2 * (long double)18446744073709551616.0 + c3 * (long double)3.402823669209384634633746e+38 + c4 * (long double)6.277101735386680763835789e+57;
+    long double ret = c1 + c2 * pow64 + c3 * pow128 + c4 * pow192;
+    return ret;
 }
 
 long double f_prime(unsigned x, unsigned y, CBlock *pblock, long double& nn, long double& tt)
@@ -4692,7 +4694,7 @@ unsigned findminSD(CBlock *pblock)
     long double t = pblock->nTime;
     long double k = 1;
     static long double nm = 1,tm = 1;
-    static long nc = 0;
+    long nc = 0;
     hashold = pblock->GetHash();
     while(true)
     {
@@ -4701,25 +4703,30 @@ unsigned findminSD(CBlock *pblock)
       //   nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
       //   tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
+         k = n/t;
          if(n == 0 || t == 0)
          {
              break;
          }
-         k = n/t;
+
          if(k > 1)
          {
              y_old += t/fabs(t);
              x_old += (int)round(n/fabs(n) * fabs(k));
          }else{
              x_old += n/fabs(n);
-             y_old += t/fabs(t);
+             y_old += t/fabs(t);//(int)round(t/fabs(t) * fabs(1.0/k));
          }
 
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
-        hash = pblock->GetHash();
-        if(hash > hashold)
+        if((k < 1.01 && k > 0.99))
+        {
             break;
+        }
+      //  hash = pblock->GetHash();
+     //   if(hash >= hashold)
+     //       break;
         hashold = hash;
     }
     return x_old;
@@ -4849,7 +4856,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         unsigned int nNonceFound2 = 0;
         unsigned int nTimeFound = 0;
         unsigned int nHashesDone = 0;
-        // Crypto++ SHA256
+        // Crypto++ SHA256   rand() % 0xff000000;//
         nNonceFound2 = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
         // Check if something found
         if (nNonceFound2 != (unsigned int) -1)
