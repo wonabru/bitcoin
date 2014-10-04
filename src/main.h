@@ -142,7 +142,7 @@ bool InitBlockIndex();
 /** Load the block tree and coins database from disk */
 static const char *byte_to_binary(uint256 x);
 static const char *byte_to_binary(int x);
-static const char *byte_to_binary(unsigned int x);
+char *byte_to_binary(unsigned int x);
 bool LoadBlockIndex();
 /** Unload database information */
 void UnloadBlockIndex();

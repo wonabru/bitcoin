@@ -4560,9 +4560,9 @@ static const char *byte_to_binary(uint256 x)
     return b;
 }
 
-static const char *byte_to_binary(unsigned int x)
+char *byte_to_binary(unsigned int x)
 {
-    static char b[33];
+    char b[33];
     b[0] = '\0';
     unsigned int z = 1;
     //std::string cc = "70000000000000000000000000000000";
@@ -4643,7 +4643,8 @@ static int maxbit(uint256 x)
 
 int howManyOnes(unsigned q)
 {
-    const char * qs = byte_to_binary(q);
+    char qs[33];
+    qs = byte_to_binary(q);
     int ret = 0;
     for(int i=0;i<32;i++)
     {
@@ -4700,14 +4701,11 @@ unsigned findminSD(CBlock *pblock)
 {
     unsigned x_old = pblock->nNonce;
     unsigned y_old = pblock->nTime;
-    static long double eps = 0.1e-10;
     uint256 hash,hashold;
     long double n = pblock->nNonce;
     long double t = pblock->nTime;
     long double k = 1;
-    static long double nm = 1,tm = 1;
     long nc = 0;
-    hashold = pblock->GetHash();
     while(true)
     {
          n = f_prime(1,0,pblock,n,t);
@@ -4739,10 +4737,6 @@ unsigned findminSD(CBlock *pblock)
             else
                 pblock->nTime = GetTime();
         }
-      //  hash = pblock->GetHash();
-     //   if(hash >= hashold)
-     //       break;
-        hashold = hash;
     }
     return x_old;
 }
