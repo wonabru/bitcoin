@@ -4697,6 +4697,15 @@ long double f_prime(unsigned x, unsigned y, CBlock *pblock, long double& nn, lon
 
 }
 
+int toZeros(CBlock *pblock)
+{
+    unsigned x_old = pblock->nNonce;
+    unsigned y_old = pblock->nTime;
+    int zeros = howManyOnes((x_old^y_old)) * howManyOnes((x_old^(y_old>>1))) * howManyOnes(((x_old>>1)^(y_old)));
+    return zeros;
+}
+
+
 unsigned findminSD(CBlock *pblock)
 {
     unsigned x_old = pblock->nNonce;
@@ -4706,8 +4715,9 @@ unsigned findminSD(CBlock *pblock)
     long double n2 = pblock->nNonce;
     long double t2 = pblock->nTime;
     long double k = 1;
+    int zeros = 0, bestZeros = toZeros(pblock);
     uint256 hash,bestHash;
-    bestHash = 0x0;
+    bestHash = pblock->GetHash();
     long nc = 0;
     while(true)
     {
@@ -4752,14 +4762,21 @@ unsigned findminSD(CBlock *pblock)
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
         hash = pblock->GetHash();
-        if(hash < bestHash || bestHash == 0x0)
+        if(hash < bestHash)
         {
-            bestHash = hash;
-            n2 = pblock->nNonce;
-            t2 = pblock->nTime;
-        }
-        if(howManyOnes(~(x_old^y_old))>24 || howManyOnes((x_old^y_old))>24)
+            zeros = toZeros(pblock);
+            if(abs(zeros - bestZeros)<500)
+            {
+                bestHash = hash;
+                n2 = pblock->nNonce;
+                t2 = pblock->nTime;
+                bestZeros = zeros;
+            }else{
                 break;
+            }
+        }
+        if(nc>1000)
+            break;
     }
     pblock->nNonce = n2;
     pblock->nTime = t2;
