@@ -4760,10 +4760,10 @@ unsigned findminSD(CBlock *pblock)
         if((k < 1.05 && k > 0.95))
         {
             if(howManyOnes(~(x_old^y_old))<=16 || howManyOnes((x_old^y_old))<=16||howManyOnes(~(~x_old^y_old))<=16 || howManyOnes((x_old^(~y_old)))<=16||howManyOnes((~x_old^y_old))<=16 || howManyOnes(~(x_old^(~y_old)))<=16)
-                break;
+                return 1;
         }
     }
-    return x_old;
+    return 0;
 }
 
 unsigned findmin(CBlock *pblock)
@@ -4837,14 +4837,9 @@ unsigned WON(unsigned q, unsigned w)
 }
 
 
-void controlfork(CWallet *pwallet, int cores)
-{
-    minerThreads->create_thread(boost::bind(&BitcoinMiner, pwallet, cores));
-}
 
 
-
-void static BitcoinMiner(CWallet *pwallet, int cores)
+void static BitcoinMiner(CWallet *pwallet, int nothread, int cores)
 {
     printf("BitcoinMiner started\n");
     SetThreadPriority(THREAD_PRIORITY_BELOW_NORMAL);
@@ -4894,23 +4889,18 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         unsigned int nTimeFound = 0;
         unsigned int nHashesDone = 0;
         // Crypto++ SHA256  % 0xff000000;//
-        nNonceFound2 = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
+        try
+            {
+            loop
+            {
+        nNonceFound2 = (unsigned)(nothread * 1.0 / cores * 0xff000000) + rand() % (unsigned)(1.0 / cores * 0xff000000);//ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
         // Check if something found
-        if (nNonceFound2 != (unsigned int) -1)
-        {
-        nNonceFound = ByteReverse(nNonceFound2);
-        pblock->nNonce = nNonceFound;
-    try
-        {
-        loop
-        {
-               g++;
-                nNonceFound = findminSD(pblock);
-                if(nNonceFound >=  0xff000000)
-                   break;
-                pblock->nNonce = nNonceFound;
-                hash = pblock->GetHash();
 
+        pblock->nNonce = nNonceFound2;
+
+               g++;
+                findminSD(pblock);
+                hash = pblock->GetHash();
                     if(hash < bestHashAll)
                     {
                         bestHashAll = hash;
@@ -4919,6 +4909,8 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                         cout << "BestHash: "<<(256 - maxbit(bestHash)) <<endl;
                         cout << "BestHashAll: "<<(256 - maxbit(bestHashAll))<<endl;
                         cout << "HashTarget: "<<(256 - maxbit(hashTarget))<<endl;
+                        cout << "Zero found. Time [minutes]: "<< (GetTime() - nStart)/60.0<<endl;
+                        nStart = GetTime();
                     }
                     if(hash < bestHash)
                     {
@@ -4932,7 +4924,7 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                     SetThreadPriority(THREAD_PRIORITY_NORMAL);
                     CheckWork(pblock, *pwalletMain, reservekey);
                     SetThreadPriority(THREAD_PRIORITY_BELOW_NORMAL);
-                    cout << "Block found. Time [minutes]: "<< (GetTime() - nStart)/1000.0/60.0<<endl;
+                    cout << "Block found. Time [minutes]: "<< (GetTime() - nStart)/60.0<<endl;
                     //delete pblocktemplate;
                     StartTime = GetTime();
                     bestHashAll = (uint256)(-1);
@@ -4958,7 +4950,6 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
          {
 
          }
-        }
 
         }
     }
@@ -4988,7 +4979,7 @@ void GenerateBitcoins(bool fGenerate, CWallet* pwallet)
 
     minerThreads = new boost::thread_group();
     for (int i = 0; i < nThreads; i++)
-        minerThreads->create_thread(boost::bind(&BitcoinMiner, pwallet, nThreads));
+        minerThreads->create_thread(boost::bind(&BitcoinMiner, pwallet, i, nThreads));
 }
 
 // Amount compression:
