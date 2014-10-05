@@ -4672,7 +4672,7 @@ long double toLongDouble(uint256 b)
     return ret;
 }
 
-long double f_prime(unsigned x, unsigned y, CBlock *pblock, long double& nn, long double& tt)
+long double f_prime(int x, int y, CBlock *pblock, long double& nn, long double& tt)
 {
     uint256 hash2 = pblock->GetHash();
     unsigned n = pblock->nNonce;
@@ -4688,9 +4688,9 @@ long double f_prime(unsigned x, unsigned y, CBlock *pblock, long double& nn, lon
         tt = (long double)toLongDouble(hash3 - hash2) * 1.0/(double)y;
         return 0;
     }
-    else if(x>0 && y == 0)
+    else if(x>0 && y < 0)
         return (long double)toLongDouble(hash3 - hash2) * 1.0/(double)x;
-    else if(x==0 && y > 0)
+    else if(x < 0 && y > 0)
         return (long double)toLongDouble(hash3 - hash2) * 1.0/(double)y;
     else
         return 0;
@@ -4721,8 +4721,8 @@ unsigned findminSD(CBlock *pblock)
     long nc = 0;
     while(true)
     {
-         n = f_prime(1,0,pblock,n,t);
-         t = f_prime(0,1,pblock,n,t);
+         n = f_prime(1,-1,pblock,n,t);
+         t = f_prime(-1,1,pblock,n,t);
       //   nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
       //   tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
@@ -4745,10 +4745,10 @@ unsigned findminSD(CBlock *pblock)
              }
          }*/
          k = n/t;
-         if(k>4)
-             k = 4;
-         if(k<0.25)
-             k=0.25;
+         if(k>100)
+             k = 100;
+         if(k<0.01)
+             k=0.01;
          if(k > 1)
          {
              y_old += t/fabs(t);
@@ -4757,26 +4757,23 @@ unsigned findminSD(CBlock *pblock)
              x_old += n/fabs(n);
             y_old += (int)round(t/fabs(t) * fabs(1.0/k));
          }
-         if(abs(y_old - GetTime())>600)
-             y_old = GetTime();
+      //   if(abs(y_old - GetTime())>600)
+      //       break;
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
         hash = pblock->GetHash();
+        zeros = toZeros(pblock);
         if(hash < bestHash)
         {
-            zeros = toZeros(pblock);
-            if(abs(zeros - bestZeros)<500)
-            {
-                bestHash = hash;
-                n2 = pblock->nNonce;
-                t2 = pblock->nTime;
-                bestZeros = zeros;
-            }else{
-                break;
-            }
-        }
-        if(nc>1000)
+              bestHash = hash;
+              n2 = pblock->nNonce;
+              t2 = pblock->nTime;
+              bestZeros = zeros;
+        }else if(zeros > bestZeros +1000)
             break;
+
+      //  if(nc>1000000)
+      //      break;
     }
     pblock->nNonce = n2;
     pblock->nTime = t2;
