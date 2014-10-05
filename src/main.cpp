@@ -4706,6 +4706,8 @@ unsigned findminSD(CBlock *pblock)
     long double n2 = pblock->nNonce;
     long double t2 = pblock->nTime;
     long double k = 1;
+    uint256 hash,bestHash;
+    bestHash = 0x0;
     long nc = 0;
     while(true)
     {
@@ -4714,7 +4716,7 @@ unsigned findminSD(CBlock *pblock)
       //   nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
       //   tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
-         k = n/t;
+       /*  k = n/t;
          n2 = f_prime(-1,0,pblock,n,t);
          t2 = f_prime(0,-1,pblock,n,t);
          if(fabs(n-t)>fabs(n-t2))
@@ -4731,17 +4733,12 @@ unsigned findminSD(CBlock *pblock)
              {
                  n=n2;
              }
-         }
+         }*/
          k = n/t;
-         if(k>10)
-             k = 10;
-         if(k<0.1)
-             k=0.1;
-         if(n == 0 || t == 0)
-         {
-             break;
-         }
-
+         if(k>4)
+             k = 4;
+         if(k<0.25)
+             k=0.25;
          if(k > 1)
          {
              y_old += t/fabs(t);
@@ -4754,13 +4751,18 @@ unsigned findminSD(CBlock *pblock)
              y_old = GetTime();
         pblock->nNonce = x_old;
         pblock->nTime = y_old;
-
-        if((k < 1.05 && k > 0.95))
+        hash = pblock->GetHash();
+        if(hash < bestHash || bestHash == 0x0)
         {
-            if(howManyOnes(~(x_old^y_old))<=16 || howManyOnes((x_old^y_old))<=16||howManyOnes(~(~x_old^y_old))<=16 || howManyOnes((x_old^(~y_old)))<=16||howManyOnes((~x_old^y_old))<=16 || howManyOnes(~(x_old^(~y_old)))<=16)
-                return 1;
+            bestHash = hash;
+            n2 = pblock->nNonce;
+            t2 = pblock->nTime;
         }
+        if(howManyOnes(~(x_old^y_old))>20 || howManyOnes((x_old^y_old))>20||howManyOnes(~(~x_old^y_old))>20 || howManyOnes((x_old^(~y_old)))>20||howManyOnes((~x_old^y_old))>20 || howManyOnes(~(x_old^(~y_old)))>20)
+                break;
     }
+    pblock->nNonce = n2;
+    pblock->nTime = t2;
     return 0;
 }
 
