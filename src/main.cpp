@@ -4719,20 +4719,19 @@ unsigned findminSD(CBlock *pblock)
          k = n/t;
          n2 = f_prime(-1,0,pblock,n,t);
          t2 = f_prime(0,-1,pblock,n,t);
-         k2 = n2/t2;
-         if(k>1)
+         if(fabs(n-t)>fabs(n-t2))
          {
-             if(k>k2)
+             if(fabs(n-t2)>fabs(n2-t2))
              {
-                 n=n2;
+                t=t2;
+                n=n2;
+             }else{
                  t=t2;
              }
          }else{
-             if(k<k2)
+             if(fabs(n-t)>fabs(n2-t))
              {
                  n=n2;
-                 t=t2;
-
              }
          }
          k = n/t;
@@ -4895,29 +4894,20 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         unsigned int nTimeFound = 0;
         unsigned int nHashesDone = 0;
         // Crypto++ SHA256  % 0xff000000;//
-        nNonceFound2 = rand();// ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
+        nNonceFound2 = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
         // Check if something found
         if (nNonceFound2 != (unsigned int) -1)
         {
         nNonceFound = ByteReverse(nNonceFound2);
-        nTimeFound = pblock->nTime;
-        hash = pblock->GetHash();
-         bestHash = hash;
+        pblock->nNonce = nNonceFound;
     try
         {
         loop
         {
                g++;
-                pblock->nTime = nTimeFound;
-                unsigned nh;
-                    nh = findminSD(pblock);
-                    nTimeFound = pblock->nTime;
-                if(nNonceFound == nh)
-                    break;
-                nNonceFound = nh;
-              //  if(nNonceFound >=  0xff000000)
-               //    break;
-
+                nNonceFound = findminSD(pblock);
+                if(nNonceFound >=  0xff000000)
+                   break;
                 pblock->nNonce = nNonceFound;
                 hash = pblock->GetHash();
 
