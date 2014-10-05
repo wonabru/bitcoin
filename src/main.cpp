@@ -4758,7 +4758,7 @@ unsigned findminSD(CBlock *pblock)
             n2 = pblock->nNonce;
             t2 = pblock->nTime;
         }
-        if(howManyOnes(~(x_old^y_old))>20 || howManyOnes((x_old^y_old))>20||howManyOnes(~(~x_old^y_old))>20 || howManyOnes((x_old^(~y_old)))>20||howManyOnes((~x_old^y_old))>20 || howManyOnes(~(x_old^(~y_old)))>20)
+        if(howManyOnes(~(x_old^y_old))>24 || howManyOnes((x_old^y_old))>24)
                 break;
     }
     pblock->nNonce = n2;
