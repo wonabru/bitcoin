@@ -4704,15 +4704,37 @@ unsigned findminSD(CBlock *pblock)
     uint256 hash,hashold;
     long double n = pblock->nNonce;
     long double t = pblock->nTime;
+    long double n2 = pblock->nNonce;
+    long double t2 = pblock->nTime;
     long double k = 1;
+    long double k2 = 1;
     long nc = 0;
     while(true)
     {
-         n = f_prime(rand()%2==0?-1:1,0,pblock,n,t);
-         t = f_prime(0,rand()%2==0?-1:1,pblock,n,t);
+         n = f_prime(1,0,pblock,n,t);
+         t = f_prime(0,1,pblock,n,t);
       //   nm = nm * nc / (nc+1.0)+fabs(n) / (nc+1.0);
       //   tm = tm * nc / (nc+1.0)+fabs(t) / (nc+1.0);
          nc++;
+         k = n/t;
+         n2 = f_prime(-1,0,pblock,n,t);
+         t2 = f_prime(0,-1,pblock,n,t);
+         k2 = n2/t2;
+         if(k>1)
+         {
+             if(k>k2)
+             {
+                 n=n2;
+                 t=t2;
+             }
+         }else{
+             if(k<k2)
+             {
+                 n=n2;
+                 t=t2;
+
+             }
+         }
          k = n/t;
          if(k>4)
              k = 4;
@@ -4738,7 +4760,7 @@ unsigned findminSD(CBlock *pblock)
 
         if((k < 1.05 && k > 0.95))
         {
-            if(howManyOnes(~(x_old^y_old))<=16 || howManyOnes((x_old^y_old))<=16)
+            if(howManyOnes(~(x_old^y_old))<=16 || howManyOnes((x_old^y_old))<=16||howManyOnes(~(~x_old^y_old))<=16 || howManyOnes((x_old^(~y_old)))<=16||howManyOnes((~x_old^y_old))<=16 || howManyOnes(~(x_old^(~y_old)))<=16)
                 break;
         }
     }
@@ -4872,8 +4894,8 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
         unsigned int nNonceFound2 = 0;
         unsigned int nTimeFound = 0;
         unsigned int nHashesDone = 0;
-        // Crypto++ SHA256 rand() % 0xff000000;//
-        nNonceFound2 = ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
+        // Crypto++ SHA256  % 0xff000000;//
+        nNonceFound2 = rand();// ScanHash_CryptoPP(pmidstate, pdata + 64, phash1,(char*)&hash, nHashesDone);
         // Check if something found
         if (nNonceFound2 != (unsigned int) -1)
         {
@@ -4893,8 +4915,8 @@ void static BitcoinMiner(CWallet *pwallet, int cores)
                 if(nNonceFound == nh)
                     break;
                 nNonceFound = nh;
-                if(nNonceFound >=  0xff000000)
-                   break;
+              //  if(nNonceFound >=  0xff000000)
+               //    break;
 
                 pblock->nNonce = nNonceFound;
                 hash = pblock->GetHash();
