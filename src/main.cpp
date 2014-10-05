@@ -4701,13 +4701,11 @@ unsigned findminSD(CBlock *pblock)
 {
     unsigned x_old = pblock->nNonce;
     unsigned y_old = pblock->nTime;
-    uint256 hash,hashold;
     long double n = pblock->nNonce;
     long double t = pblock->nTime;
     long double n2 = pblock->nNonce;
     long double t2 = pblock->nTime;
     long double k = 1;
-    long double k2 = 1;
     long nc = 0;
     while(true)
     {
@@ -4735,10 +4733,10 @@ unsigned findminSD(CBlock *pblock)
              }
          }
          k = n/t;
-         if(k>4)
-             k = 4;
-         if(k<0.25)
-             k=0.25;
+         if(k>10)
+             k = 10;
+         if(k<0.1)
+             k=0.1;
          if(n == 0 || t == 0)
          {
              break;
@@ -4852,6 +4850,7 @@ void static BitcoinMiner(CWallet *pwallet, int nothread, int cores)
     uint256 bestHash("0xff0000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
    int64 StartTime = GetTime();
     static uint256 bestHashAll = bestHash;
+    int64 nStart = GetTime();
    try {
         loop {
         while (vNodes.empty())
@@ -4882,7 +4881,7 @@ void static BitcoinMiner(CWallet *pwallet, int nothread, int cores)
        //
        uint256 hashbuf[2];
        uint256& hash = *alignup<16>(hashbuf);
-        int64 nStart = GetTime();
+
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
         unsigned int nNonceFound = 0;
         unsigned int nNonceFound2 = 0;
